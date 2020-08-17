@@ -3,10 +3,13 @@ import { headersToObj } from './helpers/headers'
 export default function xhr(config: AxiosRequestConfig): AxiosPromise {
   return new Promise((resolve, reject) => {
     try {
-      const { data = null, url, method = 'get', headers, responseType } = config
+      const { data = null, url, method = 'get', headers, responseType,timeout } = config
       const request = new XMLHttpRequest()
       if (responseType) {
         request.responseType = responseType
+      }
+      if(timeout){
+        request.timeout = timeout
       }
       request.open(method.toUpperCase(), url, true)
       request.onreadystatechange = function handleLoad() {
@@ -25,6 +28,12 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
           request
         }
         resolve(response)
+      }
+      request.onerror = function handleError(){
+        reject(new Error('Network Error'))
+      }
+      request.ontimeout = function handleTimeOut(){
+        reject(new Error('Timeout Error'))
       }
       Object.keys(headers).forEach(item => {
         request.setRequestHeader(item, headers[item])
